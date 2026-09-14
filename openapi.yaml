@@ -1,0 +1,717 @@
+openapi: 3.0.3
+info:
+  title: Situara
+  version: 0.1.0
+  description: >-
+    Real-time analytics value-chain runtime for IoT and operational streams.
+    Moves events from ingest through contextual and situational intelligence to
+    predictive, prescriptive, and executed next-best actions inside latency SLOs.
+  x-product-slug: ai-enterprise-situara
+  x-source: ai-in-enterprise/Analytics-Value-Chain-Presentation-DaleSkeen/
+servers:
+  - url: https://api.example.com
+tags:
+  - name: Chains
+    description: Analytics value chain definitions and maturity
+  - name: Context
+    description: Contextual enrichment sources
+  - name: Situations
+    description: Situational intelligence rules
+  - name: Models
+    description: Predictive model promotion and feature parity
+  - name: Prescriptions
+    description: Prescriptive next-best-action policies
+  - name: Actions
+    description: Intelligent action execution and approvals
+  - name: Governance
+    description: Safe-mode, consent, SLO, and audit traces
+paths:
+  /v1/value-chains:
+    get:
+      operationId: listValueChains
+      tags: [Chains]
+      security: [{ ApiKeyAuth: [] }, { BearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Value chains page
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ListEnvelopeValueChain" }
+    post:
+      operationId: createValueChain
+      tags: [Chains]
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ValueChain" }
+      responses:
+        "201":
+          description: Chain created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DataEnvelopeValueChain" }
+  /v1/value-chains/{chainId}:
+    parameters:
+      - name: chainId
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      operationId: getValueChain
+      tags: [Chains]
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200":
+          description: Value chain
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DataEnvelopeValueChain" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /v1/value-chains/{chainId}/latency-slo:
+    parameters:
+      - name: chainId
+        in: path
+        required: true
+        schema: { type: string }
+    put:
+      operationId: putLatencySlo
+      tags: [Chains]
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LatencySLO" }
+      responses:
+        "200":
+          description: SLO updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DataEnvelopeLatencySLO" }
+  /v1/contextual-sources:
+    get:
+      operationId: listContextualSources
+      tags: [Context]
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: chainId
+          in: query
+          schema: { type: string }
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Contextual sources
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ListEnvelopeContextualSource" }
+    post:
+      operationId: registerContextualSource
+      tags: [Context]
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ContextualSource" }
+      responses:
+        "201":
+          description: Source registered
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DataEnvelopeContextualSource" }
+  /v1/situation-rules:
+    get:
+      operationId: listSituationRules
+      tags: [Situations]
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: chainId
+          in: query
+          schema: { type: string }
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Situation rules
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ListEnvelopeSituationRule" }
+    post:
+      operationId: createSituationRule
+      tags: [Situations]
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SituationRule" }
+      responses:
+        "201":
+          description: Rule created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DataEnvelopeSituationRule" }
+  /v1/predictive-models:
+    get:
+      operationId: listPredictiveModels
+      tags: [Models]
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Models
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ListEnvelopePredictiveModel" }
+    post:
+      operationId: registerPredictiveModel
+      tags: [Models]
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PredictiveModel" }
+      responses:
+        "201":
+          description: Model registered
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DataEnvelopePredictiveModel" }
+  /v1/predictive-models/{modelId}/promote:
+    parameters:
+      - name: modelId
+        in: path
+        required: true
+        schema: { type: string }
+    post:
+      operationId: promotePredictiveModel
+      tags: [Models]
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/FeatureParityCheck" }
+      responses:
+        "200":
+          description: Model promoted to streaming
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DataEnvelopePredictiveModel" }
+        "409":
+          description: Feature parity failed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Problem" }
+  /v1/prescription-policies:
+    get:
+      operationId: listPrescriptionPolicies
+      tags: [Prescriptions]
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: chainId
+          in: query
+          schema: { type: string }
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Prescription policies
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ListEnvelopePrescriptionPolicy" }
+    post:
+      operationId: createPrescriptionPolicy
+      tags: [Prescriptions]
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PrescriptionPolicy" }
+      responses:
+        "201":
+          description: Policy created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DataEnvelopePrescriptionPolicy" }
+  /v1/intelligent-actions:
+    get:
+      operationId: listIntelligentActions
+      tags: [Actions]
+      security: [{ ApiKeyAuth: [] }, { BearerAuth: [] }]
+      parameters:
+        - name: chainId
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { type: string, enum: [pending_approval, executed, held, failed] }
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Actions page
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ListEnvelopeIntelligentAction" }
+    post:
+      operationId: submitIntelligentAction
+      tags: [Actions]
+      security: [{ ApiKeyAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/IntelligentAction" }
+      responses:
+        "202":
+          description: Action accepted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DataEnvelopeIntelligentAction" }
+  /v1/intelligent-actions/{actionId}/approval:
+    parameters:
+      - name: actionId
+        in: path
+        required: true
+        schema: { type: string }
+    post:
+      operationId: resolveActionApproval
+      tags: [Actions]
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ActionApproval" }
+      responses:
+        "200":
+          description: Approval resolved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DataEnvelopeIntelligentAction" }
+  /v1/governance/safe-mode:
+    post:
+      operationId: enterSafeMode
+      tags: [Governance]
+      security: [{ ApiKeyAuth: [] }, { BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SafeModeEvent" }
+      responses:
+        "202":
+          description: Safe-mode engaged
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DataEnvelopeSafeModeEvent" }
+  /v1/governance/audit-traces:
+    get:
+      operationId: listAuditTraces
+      tags: [Governance]
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: chainId
+          in: query
+          schema: { type: string }
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Stage audit traces
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ListEnvelopeAuditTrace" }
+  /v1/value-capture:
+    post:
+      operationId: recordValueCapture
+      tags: [Governance]
+      security: [{ ApiKeyAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ValueCaptureEvent" }
+      responses:
+        "201":
+          description: Value capture recorded
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DataEnvelopeValueCaptureEvent" }
+components:
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Cursor:
+      name: cursor
+      in: query
+      schema: { type: string }
+    Limit:
+      name: limit
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+  responses:
+    Unauthorized:
+      description: Missing or invalid credentials
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Problem" }
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Problem" }
+    UnprocessableEntity:
+      description: Validation failed
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Problem" }
+
+  schemas:
+
+    ResponseMeta:
+      type: object
+      required: [requestId, timestamp]
+      properties:
+        requestId: { type: string }
+        timestamp: { type: string, format: date-time }
+    Problem:
+      type: object
+      required: [type, title, status]
+      properties:
+        type: { type: string, format: uri }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+
+    ValueChain:
+      type: object
+      required: [id, name, domain, maturity, eventRateClass]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        domain: { type: string, enum: [utilities, telecom, industrial, insurance_telematics] }
+        maturity: { type: string, enum: [connected, aware, reactive, predictive, proactive] }
+        eventRateClass: { type: string, enum: [class_250k_eps, class_1m_eps, custom] }
+        status: { type: string, enum: [draft, live, safe_mode] }
+    LatencySLO:
+      type: object
+      required: [chainId, ingestToActionMs, breachAlert]
+      properties:
+        chainId: { type: string }
+        ingestToActionMs: { type: integer, example: 1000 }
+        breachAlert: { type: boolean }
+    ContextualSource:
+      type: object
+      required: [id, chainId, name, sourceType]
+      properties:
+        id: { type: string }
+        chainId: { type: string }
+        name: { type: string }
+        sourceType: { type: string, enum: [crm, asset_history, weather, schedule, gis] }
+        preloadRequired: { type: boolean }
+        joinKey: { type: string }
+    SituationRule:
+      type: object
+      required: [id, chainId, name, precisionTarget]
+      properties:
+        id: { type: string }
+        chainId: { type: string }
+        name: { type: string }
+        description: { type: string, example: "Eurostar vs local train vs highway" }
+        precisionTarget: { type: number, format: float }
+        expression: { type: string }
+    PredictiveModel:
+      type: object
+      required: [id, chainId, name, status]
+      properties:
+        id: { type: string }
+        chainId: { type: string }
+        name: { type: string }
+        status: { type: string, enum: [trained_historical, parity_pending, streaming_live, rejected] }
+        trainingLakeRef: { type: string }
+    FeatureParityCheck:
+      type: object
+      required: [passed, mismatchedFeatures]
+      properties:
+        passed: { type: boolean }
+        mismatchedFeatures:
+          type: array
+          items: { type: string }
+        notes: { type: string }
+    PrescriptionPolicy:
+      type: object
+      required: [id, chainId, actionType, requiresApproval]
+      properties:
+        id: { type: string }
+        chainId: { type: string }
+        actionType: { type: string, enum: [customer_message, work_order, meter_investigation, bpm_case, quarantine] }
+        requiresApproval: { type: boolean }
+        precedence: { type: integer }
+        ruleSummary: { type: string }
+    IntelligentAction:
+      type: object
+      required: [id, chainId, actionType, status]
+      properties:
+        id: { type: string }
+        chainId: { type: string }
+        actionType: { type: string }
+        status: { type: string, enum: [pending_approval, executed, held, failed] }
+        situationId: { type: string }
+        predictionScore: { type: number, format: float }
+        stageTrace: { type: string }
+        latencyMs: { type: integer }
+    ActionApproval:
+      type: object
+      required: [outcome, decidedBy]
+      properties:
+        outcome: { type: string, enum: [approve, reject] }
+        decidedBy: { type: string }
+        rationale: { type: string }
+    SafeModeEvent:
+      type: object
+      required: [id, chainId, reason]
+      properties:
+        id: { type: string }
+        chainId: { type: string }
+        reason: { type: string, enum: [feature_skew, low_confidence, slo_breach] }
+        fallbackPolicy: { type: string }
+    AuditTrace:
+      type: object
+      required: [id, chainId, stages]
+      properties:
+        id: { type: string }
+        chainId: { type: string }
+        actionId: { type: string }
+        stages: { type: string }
+        createdAt: { type: string, format: date-time }
+    ValueCaptureEvent:
+      type: object
+      required: [id, chainId, actionId, metricName, metricValue]
+      properties:
+        id: { type: string }
+        chainId: { type: string }
+        actionId: { type: string }
+        metricName: { type: string, enum: [offer_accept, outage_minutes_avoided, fraud_dollars, truck_rolls_avoided] }
+        metricValue: { type: number, format: double }
+
+    DataEnvelopeValueChain:
+      type: object
+      required: [data, meta]
+      properties:
+        data: { $ref: "#/components/schemas/ValueChain" }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    ListEnvelopeValueChain:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items: { $ref: "#/components/schemas/ValueChain" }
+            nextCursor: { type: string }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+
+    DataEnvelopeLatencySLO:
+      type: object
+      required: [data, meta]
+      properties:
+        data: { $ref: "#/components/schemas/LatencySLO" }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    ListEnvelopeLatencySLO:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items: { $ref: "#/components/schemas/LatencySLO" }
+            nextCursor: { type: string }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+
+    DataEnvelopeContextualSource:
+      type: object
+      required: [data, meta]
+      properties:
+        data: { $ref: "#/components/schemas/ContextualSource" }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    ListEnvelopeContextualSource:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items: { $ref: "#/components/schemas/ContextualSource" }
+            nextCursor: { type: string }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+
+    DataEnvelopeSituationRule:
+      type: object
+      required: [data, meta]
+      properties:
+        data: { $ref: "#/components/schemas/SituationRule" }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    ListEnvelopeSituationRule:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items: { $ref: "#/components/schemas/SituationRule" }
+            nextCursor: { type: string }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+
+    DataEnvelopePredictiveModel:
+      type: object
+      required: [data, meta]
+      properties:
+        data: { $ref: "#/components/schemas/PredictiveModel" }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    ListEnvelopePredictiveModel:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items: { $ref: "#/components/schemas/PredictiveModel" }
+            nextCursor: { type: string }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+
+    DataEnvelopePrescriptionPolicy:
+      type: object
+      required: [data, meta]
+      properties:
+        data: { $ref: "#/components/schemas/PrescriptionPolicy" }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    ListEnvelopePrescriptionPolicy:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items: { $ref: "#/components/schemas/PrescriptionPolicy" }
+            nextCursor: { type: string }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+
+    DataEnvelopeIntelligentAction:
+      type: object
+      required: [data, meta]
+      properties:
+        data: { $ref: "#/components/schemas/IntelligentAction" }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    ListEnvelopeIntelligentAction:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items: { $ref: "#/components/schemas/IntelligentAction" }
+            nextCursor: { type: string }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+
+    DataEnvelopeSafeModeEvent:
+      type: object
+      required: [data, meta]
+      properties:
+        data: { $ref: "#/components/schemas/SafeModeEvent" }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    ListEnvelopeSafeModeEvent:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items: { $ref: "#/components/schemas/SafeModeEvent" }
+            nextCursor: { type: string }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+
+    DataEnvelopeAuditTrace:
+      type: object
+      required: [data, meta]
+      properties:
+        data: { $ref: "#/components/schemas/AuditTrace" }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    ListEnvelopeAuditTrace:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items: { $ref: "#/components/schemas/AuditTrace" }
+            nextCursor: { type: string }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+
+    DataEnvelopeValueCaptureEvent:
+      type: object
+      required: [data, meta]
+      properties:
+        data: { $ref: "#/components/schemas/ValueCaptureEvent" }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    ListEnvelopeValueCaptureEvent:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items: { $ref: "#/components/schemas/ValueCaptureEvent" }
+            nextCursor: { type: string }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+
